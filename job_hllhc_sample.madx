@@ -1,0 +1,42 @@
+option,-echo,-warn,-info;
+system,"ln -fns /afs/cern.ch/eng/lhc/optics/HLLHCV1.0 slhc";
+system,"ln -fns /afs/cern.ch/eng/lhc/optics/V6.503 db5";
+option,-echo,-info,-warn;
+
+call,file="slhc/toolkit/macro.madx";
+
+Option, -echo,-warn,-info;
+REAL CONST l.TAN   = 3.7  ;REAL CONST l.TANAL = l.TAN;
+REAL CONST l.TANAR = l.TAN;REAL CONST l.TANC  = l.TAN;
+REAL CONST l.TCT   = 1.0;REAL CONST l.TCTH  = l.TCT;REAL CONST l.TCTVA = l.TCT;
+call,file="db5/V6.5.seq";
+
+Option, -echo,-warn,-info,no_fatal_stop;
+
+call,file="slhc/hllhc_sequence.madx";
+bs_type=4; ap_mqx=150;
+
+call,file="slhc/opt_round.madx";
+
+//call, file = 'updateIBS.madx';
+value, NRJ, intensity, dpp, epsxn, epsyn, sigs;
+
+beam, particle=proton, energy=NRJ, NPART=intensity, sige=dpp, ex:= epsxn/(NRJ/0.93827231), ey:= epsyn/(NRJ/0.93827231), sigt=sigs;
+show, beam;
+
+use, sequence=lhcb1;
+
+exec,check_ip(b1); 
+
+use, sequence=lhcb1;
+
+ibs; !,file="table_ibs.out";
+taux=ibs.tx/3600;
+tauz=ibs.tl/3600;
+
+//assign, echo = 'tauxz.out';
+value,	taux, tauz;
+assign,	echo = terminal;
+value, tx7000, tl7000;
+
+stop;
